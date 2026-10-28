@@ -14,7 +14,13 @@ Before building or changing UI, read `DESIGN_SYSTEM.md` at the repo root. It is 
 single source of truth for the visual system and is also served at `/llms.txt`:
 
 - every token lives in `src/app/globals.css` under `@theme` (no `tailwind.config.*`);
-- components are `Logo`, `Reveal`, `Button`/`buttonStyles`, `ArrowIcon`, `Swatch`;
+- components are `Logo`, `Reveal`, `Button`/`buttonStyles`, `NavLink`, `Swatch`;
+  page sections live beside them (`site-header.tsx`, `hero.tsx`);
+- **all icons live in `src/components/ui/icons.tsx`** (`ArrowIcon`, `PauseIcon`,
+  `PlayIcon`, `MenuIcon`, `CloseIcon`) — add a glyph there and import it; never inline
+  an `<svg>` in a page or component;
+- **every button uses `Button` or `buttonStyles()`** with a variant (`primary`,
+  `outline`, `ghost`, `glass`) and a size — never hand-roll button chrome;
 - the rules (dark only, gold as accent, quiet motion, reduced-motion coverage) and the
   anti-pattern list are in that file — follow them over inventing new values;
 - live visual reference: `/design-system`.

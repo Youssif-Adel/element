@@ -12,7 +12,7 @@ token lives in `src/app/globals.css` and is consumed as a normal utility
 
 ---
 
-## 1. The five rules
+## 1. The six rules
 
 1. **Dark only.** No light mode, no white sections. `color-scheme: dark` is set globally.
    Content sits on ink or on a `panel`; gold is the only accent.
@@ -28,6 +28,11 @@ token lives in `src/app/globals.css` and is consumed as a normal utility
 5. **Quiet motion.** Long durations, soft easing, small distances (6–28px). Motion
    clarifies hierarchy; it never performs. Everything collapses under
    `prefers-reduced-motion`.
+6. **One icon set, one button.** Every glyph in the site lives in
+   `src/components/ui/icons.tsx` — add it there and import it; never paste an `<svg>`
+   into a page or component. Every button is the `Button` component (or
+   `buttonStyles()` on a link); never hand-roll button chrome. (Functional drawing
+   such as the hero's timer border belongs to its feature, not to the icon set.)
 
 ---
 
@@ -39,10 +44,16 @@ token lives in `src/app/globals.css` and is consumed as a normal utility
 | Fonts (`next/font`)              | `src/app/fonts.ts`                                |
 | Root layout, metadata, theme     | `src/app/layout.tsx`                              |
 | Showcase page                    | `src/app/design-system/page.tsx`                  |
-| Temporary `/` → showcase         | `src/app/page.tsx`                                |
+| Homepage (header + hero)         | `src/app/page.tsx`                                |
+| Site header (glass pill)         | `src/components/site-header.tsx`                  |
+| Full-screen mobile menu          | `src/components/site-header.tsx`                  |
+| Hero carousel                    | `src/components/hero.tsx`                         |
+| Hero slide data (mock CMS)       | `src/lib/hero-slides.ts`                          |
 | Logo lockup / mark               | `src/components/logo.tsx`                         |
 | Scroll reveal                    | `src/components/reveal.tsx`                       |
 | Buttons                          | `src/components/ui/button.tsx`                    |
+| All icons (single source)        | `src/components/ui/icons.tsx`                     |
+| Nav link (premium hover)         | `src/components/ui/nav-link.tsx`                  |
 | Colour swatch (click to copy)    | `src/components/ui/swatch.tsx`                    |
 | `cn()` class joiner              | `src/lib/cn.ts`                                   |
 | This document / `/llms.txt`      | `DESIGN_SYSTEM.md`, `src/app/llms.txt/route.ts`   |
@@ -125,6 +136,7 @@ Loaded with `next/font/google` in `src/app/fonts.ts`, self-hosted, variables on 
 | `text-body-sm`     | `0.875rem`                  | 1.65        | —        | Dense copy, lists            |
 | `text-caption`     | `0.75rem`                   | 1.4         | —        | Captions, meta               |
 | `text-eyebrow`     | `0.6875rem`                 | 1           | 0.24em   | Uppercase micro-labels       |
+| `text-hero-word`   | `clamp(3.25rem, 16.5vw, 13.5rem)` | 0.85   | -0.02em  | Oversized hero backdrop word |
 
 Extra tracking tokens: `tracking-eyebrow` (`0.24em`), `tracking-brand` (`0.34em`, logo
 wordmark only).
@@ -205,6 +217,7 @@ All defined in `@layer components` in `globals.css`.
 | `.glass`         | Translucent ink with 22px backdrop blur — header, overlays          |
 | `.link-underline`| Inline link with a gold-current underline that wipes in on hover    |
 | `.marquee-mask`  | Horizontal edge fade for marquee strips                             |
+| `.no-scrollbar`  | Hides a horizontal strip's scrollbar while keeping it scrollable    |
 | `.noise`         | Fine film-grain overlay via `::after` (parent needs `relative`)     |
 | `.reveal`        | Scroll-reveal start state; `[data-visible="true"]` reveals it       |
 | `.intro`         | On-load entrance for the hero, delay via `--intro-delay`            |
@@ -231,31 +244,85 @@ stagger steps at 80–120ms and never delay more than ~400ms.
 ```tsx
 <Button variant="primary" size="md">Start a project</Button>
 <Button variant="outline" size="sm">View work</Button>
+<Button variant="glass" size="icon-sm" aria-label="Next look">
+  <ArrowIcon />
+</Button>
 <a href="#contact" className={buttonStyles({ variant: "outline", size: "md" })}>
   Enquire
 </a>
 ```
 
 - `variant`: `primary` (gold fill, ink text, shimmer sweep, gold shadow) ·
-  `outline` (hairline border, gold on hover) · `ghost` (text only).
-- `size`: `sm` (h-9) · `md` (h-11) · `lg` (h-13).
+  `outline` (hairline border, gold on hover) · `ghost` (text only) · `glass`
+  (translucent ink + border + blur, for controls over photography).
+- `size`: `sm` (h-9) · `md` (h-11) · `lg` (h-13) · `icon-sm` (40px square) ·
+  `icon` (44px square). Icon-only buttons still need an `aria-label`.
 - `buttonStyles()` returns the same classes for links — use it instead of wrapping a
-  `Button` in an `<a>`.
-- One `primary` action per view. Everything else is `outline` or `ghost`.
+  `Button` in an `<a>`. `Button` forwards its ref (React 19), so focus can be returned
+  to a trigger after a dialog closes.
+- One `primary` action per view. Everything else is `outline`, `ghost` or `glass`.
 - The shimmer sweep is built into `primary`; do not add another highlight.
+- `cursor-pointer` is part of the base classes. If you style a clickable surface by
+  hand (a card, a thumbnail), add `cursor-pointer` yourself.
+
+### `Icons` — `src/components/ui/icons.tsx`
+
+The only place glyphs are allowed. Current set: `ArrowIcon`, `PauseIcon`, `PlayIcon`,
+`MenuIcon`, `CloseIcon`.
+
+```tsx
+import { ArrowIcon, MenuIcon } from "@/components/ui/icons";
+
+<ArrowIcon />                       // 16px
+<ArrowIcon size={20} className="rotate-180" />
+```
+
+- Props: numeric `size` (rendered edge, default 16) and `className`.
+- Icons are square, drawn on a 16px grid, inherit `currentColor` and are
+  `aria-hidden` — the surrounding button or link carries the label.
+- Adding a glyph means adding an exported component to this file first, then using it.
+  Never inline a one-off `<svg>` in a page, section or component.
+
+### `NavLink` — `src/components/ui/nav-link.tsx`
+
+```tsx
+<NavLink href="/#work" label="Projects" />
+```
+
+The label flips up while a gold duplicate rises in its place — no underline. The
+motion is clipped to the label height and collapses under reduced motion. Use
+`NavLink` for the header links and the showcase nav.
+
+### `SiteHeader` — `src/components/site-header.tsx`
+
+Fixed glass pill: logo (vertically centred in a `flex` wrapper), `NavLink` row and a
+single **Join** action on `lg` and up. Below `lg` the actions collapse to a hamburger
+that opens a full-screen menu sliding in from the right with the nav links and the
+Join button. The menu locks body scroll, traps Tab, closes on Escape or a link, and
+returns focus to the hamburger. Do not re-add "Our work" or "Enquire" to the bar.
 
 ### `Logo` / `LogoMark` — `src/components/logo.tsx`
 
 ```tsx
-<Logo />                                        {/* size-9 mark + text-xl */}
-<Logo markClassName="size-8" wordmarkClassName="text-lg" />
-<LogoMark className="size-6 text-gold/70" />
+<Logo />                                              {/* 34px mark + wordmark */}
+<Logo size={32} wordmarkClassName="hidden min-[380px]:inline" />
+<Logo size={64} />                                   {/* large lockup */}
+<Logo wordmark={false} />                            {/* mark alone */}
+<LogoMark size={24} />                               {/* mark alone */}
 ```
 
-The mark is a nested diamond drawn with hairlines — scale it freely, never recolor it
-outside the gold family. `showWordmark={false}` renders the mark alone. Below 380px the
-wordmark is hidden in the header (`wordmarkClassName="hidden text-lg min-[380px]:inline"`)
-so the lockup and CTA stay inside a 320px viewport.
+The artwork is `public/logo.png` — a gold diamond cradling a serif E — rendered
+through `next/image`, so it is identical in the header, the showcase and a project
+stamp. `size` is the square edge in pixels; the wordmark's font size derives from it
+(≈0.55×), which keeps the lockup in proportion. `wordmarkClassName` is for display
+and colour only (`hidden min-[380px]:inline`, `text-gold-200`), never for sizing.
+`LogoMark` takes an optional `size` too and accepts `className` (`size-6`) when a
+layout needs a one-off dimension.
+
+The mark's colours are baked into the artwork; do not try to tint it with `text-*`.
+For the reversed lockup place it on a gold surface, and keep at least one mark-height
+of clear space around it. Below 380px the header hides the wordmark so the lockup and
+the CTA stay inside a 320px viewport.
 
 ### `Swatch` — `src/components/ui/swatch.tsx`
 
@@ -332,6 +399,33 @@ that is what makes 50% translate seamless.
 Labels are `.eyebrow text-mist`; helper text is `text-caption text-subtle`; errors are
 `text-danger` — never red borders alone, pair with text.
 
+**Hero carousel** — `src/components/hero.tsx`
+
+Full-bleed photography, an oversized translucent style word, one headline and a
+lookbook strip. Slides come from `src/lib/hero-slides.ts` (id, style, project,
+location, year, headline, src, alt) — that array is mock CMS data; replace it with the
+fetch and leave the component alone. Behaviour that must survive a refactor:
+
+- the active image crossfades over 1400ms and scales 1 → 1.12 over 13s (motion-safe
+  only), so the frame never sits perfectly still;
+- autoplay advances every 10s, and one `requestAnimationFrame` loop grows the active
+  thumbnail's border by writing `stroke-dasharray` (`0 100` → `100 100`) on a
+  `pathLength="100"` rect — the card border *is* the indicator; never add a second
+  ring or a base border behind it, and never re-render React at 60fps for a timer.
+  Do not put `vector-effect="non-scaling-stroke"` on the progress rect: Chrome then
+  resolves the dash in screen pixels, so the pattern repeats 2–3 times around the
+  card instead of drawing one continuous line;
+- the strip always shows exactly four cards, each
+  `w-[calc((100%-1.5rem)/4)]` (`2.25rem` gap from `sm`), with `overflow-x-auto`,
+  snap points and pointer-drag. Any number of slides is supported: more than four
+  scrolls and the active card is brought into view; the right-edge fade appears only
+  when there is overflow;
+- pointer hover, keyboard focus and a hidden tab pause the timer; the glass control
+  row toggles a manual pause. `aria-live` announces the new slide;
+- arrows, thumbnails and the pause control are `Button`s with labels; the giant word
+  and the backdrop stay `aria-hidden`. No project/location text sits under the cards —
+  the label is the style word only.
+
 ---
 
 ## 9. Motion
@@ -347,7 +441,12 @@ travel. Blur is used as an entrance material (6–8px → 0), never as a hover e
 
 Ambient animations available as utilities: `animate-marquee`, `animate-float`,
 `animate-glow`, `animate-spin-slow`, `animate-spin-slower`, `animate-shimmer`,
-`animate-scroll-hint`.
+`animate-scroll-hint`, `animate-hero-word`.
+
+The hero adds two timed behaviours on top of that: a 1400ms crossfade and a 13s scale
+drift (both `motion-safe:`), plus a 1400ms entrance for the giant word. Its 10s border
+trace is driven by JavaScript, so reduced motion keeps the indicator legible while
+dropping the drift. Autoplay never runs while the tab is hidden.
 
 Every one of these is disabled inside `@media (prefers-reduced-motion: reduce)`, and
 `.reveal` is forced visible there. If you add motion, add it to that block too.
@@ -368,7 +467,10 @@ a duration over ~1.2s for anything the user is waiting on.
   restyle a control, keep a visible ring and add `focus-visible:outline-none` only when
   you replace it with an equally visible ring.
 - Touch targets: buttons and links are at least 36px tall inside padded bars; standalone
-  icon controls should be 44×44 (`size-11`).
+  icon controls are 40–44px (`icon-sm`, growing with `sm:size-11` when the row allows).
+- The mobile menu is a real dialog: `role="dialog"`, `aria-modal`, `inert` when closed,
+  Tab trapped inside, Escape closes, the trigger regains focus and the page beneath
+  cannot scroll.
 - Decorative layers (rings, glows, noise, dividers, duplicate marquee copies) get
   `aria-hidden="true"` and usually `pointer-events-none`.
 - Headline hierarchy: one `h1` per page, then `h2` per section, `h3` inside.
@@ -385,7 +487,7 @@ uppercase only for `.eyebrow` labels. British spelling (`colour`, `material`, `e
 Avoid exclamation marks, "stunning", "luxury lifestyle", emoji and marketing stacks of
 adjectives. Prefer concrete nouns — oak, lime plaster, linen, morning light.
 
-Buttons: `Start a project`, `Enquire`, `View work`, `Book a consultation`.
+Buttons: `Start a project`, `Join`, `View work`, `Book a consultation`.
 
 ---
 
@@ -400,6 +502,10 @@ Buttons: `Start a project`, `Enquire`, `View work`, `Book a consultation`.
 | Gold button + gold link + gold border in one view        | One primary action, gold accents elsewhere            |
 | `transition-all duration-1000` on everything             | Specific properties, `duration-300/500`, `ease-luxe`  |
 | New `@keyframes` without a reduced-motion rule           | Add the animation to the reduced-motion block         |
+| Auto-rotation with no pause                              | Pause on hover, focus and hidden tab, plus a control  |
+| Inline `<svg>` or a copied icon path                     | Import from `src/components/ui/icons.tsx`             |
+| A hand-rolled button (`px-4 py-2 rounded-full` on a div) | `Button` or `buttonStyles()` with a variant          |
+| A separate progress ring around a card                   | Draw the indicator on the card's own border           |
 | `h-screen` for hero                                      | `min-h-[100svh]`                                      |
 | `overflow-hidden` on an ancestor of a sticky element      | `overflow-x-clip` on the page wrapper                |
 | Two font families per component                          | Headline Fraunces, everything else Manrope            |
@@ -412,8 +518,16 @@ Buttons: `Start a project`, `Enquire`, `View work`, `Book a consultation`.
 2. Check 320px: no horizontal scroll (`document.documentElement.scrollWidth === innerWidth`).
 3. Tab through: focus ring visible on every interactive element.
 4. Toggle reduced motion: no reveal, marquee or shimmer motion; content still visible.
-5. `pnpm lint` and `npx tsc --noEmit` pass.
-6. New tokens or primitives? Add them to this file and to the showcase page.
+5. Carousel: advance by hand, by keyboard and automatically; confirm it pauses on
+   hover, on focus and when the tab is hidden, and that the border trace matches the
+   interval. Add a temporary fifth slide and confirm exactly four show and the strip
+   scrolls and drags.
+6. Cursor: every button, link, card and thumbnail reads `pointer`.
+7. Menu: at 390 and 320 open the hamburger, Tab through it, press Escape, and confirm
+   scroll lock, focus return and no horizontal overflow.
+8. `pnpm lint` and `npx tsc --noEmit` pass.
+9. New tokens, primitives, icons or components? Add them to this file and to the
+   showcase page.
 
 ---
 

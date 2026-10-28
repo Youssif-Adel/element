@@ -1,66 +1,72 @@
-import type { ComponentProps } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/cn";
 
 /**
- * The Element mark: a nested diamond — a "core within a structure".
- * Drawn with hairlines so it stays crisp at any size.
+ * The Element mark — a gold diamond cradling a serif E.
+ *
+ * The artwork ships as `public/logo.png`, so the mark is identical wherever it
+ * appears. `size` is the square edge in pixels; `className` can override it
+ * (for example `size-6`) when a layout needs a different dimension.
  */
 export function LogoMark({
+  size = 32,
+  priority,
   className,
-  ...props
-}: ComponentProps<"svg">) {
+}: {
+  size?: number;
+  priority?: boolean;
+  className?: string;
+}) {
   return (
-    <svg
-      viewBox="0 0 48 48"
-      fill="none"
-      aria-hidden="true"
-      className={className}
-      {...props}
-    >
-      <path
-        d="M24 2.5 45.5 24 24 45.5 2.5 24 24 2.5Z"
-        stroke="currentColor"
-        strokeWidth="1"
-        opacity="0.5"
-      />
-      <path
-        d="M24 11.5 36.5 24 24 36.5 11.5 24 24 11.5Z"
-        stroke="currentColor"
-        strokeWidth="1.1"
-      />
-      <path d="M24 19.25 28.75 24 24 28.75 19.25 24 24 19.25Z" fill="currentColor" />
-      <path
-        d="M24 2.5v9M24 36.5v9M2.5 24h9M36.5 24h9"
-        stroke="currentColor"
-        strokeWidth="1"
-        opacity="0.3"
-      />
-    </svg>
+    <Image
+      src="/logo.png"
+      alt=""
+      width={size}
+      height={size}
+      priority={priority}
+      className={cn("shrink-0 select-none object-contain", className)}
+    />
   );
 }
 
 /**
- * Full lockup — mark + wordmark. Used in the site header and the spec page.
+ * Full lockup — mark plus wordmark.
+ *
+ * The wordmark's font size derives from `size` (roughly 0.55× the mark), so a
+ * single number keeps the lockup in proportion. `wordmarkClassName` is for
+ * display or colour changes (`hidden min-[380px]:inline`, `text-gold-200`),
+ * not for sizing.
  */
 export function Logo({
+  size = 34,
+  priority,
+  wordmark = true,
   className,
-  markClassName,
   wordmarkClassName,
-  showWordmark = true,
 }: {
+  size?: number;
+  priority?: boolean;
+  wordmark?: boolean;
   className?: string;
-  markClassName?: string;
   wordmarkClassName?: string;
-  showWordmark?: boolean;
 }) {
   return (
-    <span className={cn("inline-flex items-center gap-3.5 text-gold", className)}>
-      <LogoMark className={cn("shrink-0", markClassName ?? "size-9")} />
-      {showWordmark ? (
+    <span className={cn("inline-flex items-center gap-3.5", className)}>
+      <Image
+        src="/logo.png"
+        alt=""
+        width={size}
+        height={size}
+        priority={priority}
+        style={{ width: size, height: size }}
+        className="shrink-0 select-none object-contain"
+      />
+      {wordmark ? (
         <span
+          style={{ fontSize: Math.round(size * 0.55) }}
           className={cn(
             "font-display leading-none tracking-brand text-cream",
-            wordmarkClassName ?? "text-xl",
+            wordmarkClassName,
           )}
         >
           ELEMENT

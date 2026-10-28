@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
 import { Logo, LogoMark } from "@/components/logo";
 import { Reveal } from "@/components/reveal";
-import { ArrowIcon, Button, buttonStyles } from "@/components/ui/button";
+import { Button, buttonStyles } from "@/components/ui/button";
 import { CopyBriefButton } from "@/components/ui/copy-brief";
+import { ArrowIcon, CloseIcon, MenuIcon, PauseIcon, PlayIcon } from "@/components/ui/icons";
+import { NavLink } from "@/components/ui/nav-link";
 import { Swatch } from "@/components/ui/swatch";
 import { cn } from "@/lib/cn";
 
@@ -195,11 +197,8 @@ export default function DesignSystemPage() {
       {/* ---------------------------------------------------------------- nav */}
       <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4">
         <div className="glass mx-auto flex max-w-page items-center justify-between gap-6 rounded-pill px-4 py-3 md:px-5">
-          <a href="#top" aria-label="Element — back to top" className="shrink-0">
-            <Logo
-              markClassName="size-8"
-              wordmarkClassName="hidden text-lg min-[380px]:inline"
-            />
+          <a href="#top" aria-label="Element — back to top" className="flex shrink-0 items-center">
+            <Logo size={32} wordmarkClassName="hidden min-[380px]:inline" />
           </a>
 
           <nav
@@ -207,13 +206,7 @@ export default function DesignSystemPage() {
             className="hidden items-center gap-7 lg:flex"
           >
             {nav.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="eyebrow text-mist transition-colors duration-300 hover:text-gold-200"
-              >
-                {item.label}
-              </a>
+              <NavLink key={item.href} href={item.href} label={item.label} />
             ))}
           </nav>
 
@@ -351,7 +344,7 @@ export default function DesignSystemPage() {
           number="01"
           eyebrow="Identity"
           title="A mark built from structure."
-          description="A nested diamond reads as a core within a structure — the same logic we apply to a room. Hairline strokes keep it precise at any scale, in either gold on ink or ink on gold."
+          description="A gold diamond cradling a serif E. The mark ships as a single transparent PNG, so it reads identically in the header, in print and on a project stamp — no redrawing, no drift."
         >
           <div className="grid gap-4 lg:grid-cols-12">
             <Reveal className="min-w-0 lg:col-span-7">
@@ -360,24 +353,25 @@ export default function DesignSystemPage() {
                   aria-hidden="true"
                   className="absolute inset-0 bg-[radial-gradient(circle_at_50%_115%,rgba(217,178,92,0.18),transparent_62%)]"
                 />
-                <Logo
-                  className="relative z-10"
-                  markClassName="size-12 sm:size-16"
-                  wordmarkClassName="text-2xl sm:text-4xl"
-                />
+                <span className="relative z-10 sm:hidden">
+                  <Logo size={44} />
+                </span>
+                <span className="relative z-10 hidden sm:block">
+                  <Logo size={64} />
+                </span>
               </div>
             </Reveal>
 
             <Reveal delay={120} className="grid min-w-0 gap-4 lg:col-span-5 lg:grid-rows-2">
               <div className="panel relative flex items-center justify-center overflow-hidden bg-gold p-8 text-ink-950">
-                <LogoMark className="size-16" />
+                <LogoMark size={64} />
                 <span className="absolute bottom-5 left-6 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-900/70">
                   Reversed
                 </span>
               </div>
               <div className="panel relative flex items-center justify-center overflow-hidden p-8 text-gold">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(217,178,92,0.1),transparent_65%)]" />
-                <LogoMark className="relative z-10 size-24" />
+                <LogoMark size={96} className="relative z-10" />
                 <span className="absolute bottom-5 left-6 font-mono text-[10px] uppercase tracking-[0.16em] text-ash">
                   Monogram
                 </span>
@@ -393,7 +387,7 @@ export default function DesignSystemPage() {
               },
               {
                 title: "Minimum size",
-                body: "24px for the monogram, 96px wide for the full lockup. Below that, the hairlines blur.",
+                body: "24px for the mark alone, 120px wide for the full lockup. Below that the E loses definition.",
               },
               {
                 title: "Contrast",
@@ -840,6 +834,7 @@ export default function DesignSystemPage() {
                   </Button>
                   <Button variant="outline">View work</Button>
                   <Button variant="ghost">Read more</Button>
+                  <Button variant="glass">Glass</Button>
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-end gap-3">
@@ -852,19 +847,44 @@ export default function DesignSystemPage() {
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center gap-3">
+                  <Button variant="glass" size="icon-sm" aria-label="Previous">
+                    <ArrowIcon className="rotate-180" />
+                  </Button>
+                  <Button variant="glass" size="icon-sm" aria-label="Next">
+                    <ArrowIcon />
+                  </Button>
                   <Button
-                    size="sm"
-                    aria-label="Add"
-                    className="w-9 px-0 text-base"
+                    variant="glass"
+                    size="icon-sm"
+                    aria-label="Pause slideshow"
                   >
-                    +
+                    <PauseIcon />
                   </Button>
                   <a href="#contact" className="link-underline text-body-sm text-gold-200">
                     Inline link
                   </a>
-                  <span className="text-body-sm text-ash">
-                    Only one primary per view.
-                  </span>
+                </div>
+
+                <div className="mt-8 border-t border-line pt-6">
+                  <p className="eyebrow text-mist">Icon set</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-5 text-subtle">
+                    {[
+                      ["ArrowIcon", <ArrowIcon key="arrow" />],
+                      ["PlayIcon", <PlayIcon key="play" />],
+                      ["PauseIcon", <PauseIcon key="pause" />],
+                      ["MenuIcon", <MenuIcon key="menu" />],
+                      ["CloseIcon", <CloseIcon key="close" />],
+                    ].map(([name, icon]) => (
+                      <span key={name as string} className="flex items-center gap-2">
+                        {icon}
+                        <span className="font-mono text-[10px]">{name}</span>
+                      </span>
+                    ))}
+                  </div>
+                  <p className="mt-4 text-caption text-subtle">
+                    Every glyph lives in <code className="text-cream">src/components/ui/icons.tsx</code> —
+                    never inline an <code className="text-cream">&lt;svg&gt;</code> in a component.
+                  </p>
                 </div>
               </div>
             </Reveal>
@@ -967,7 +987,7 @@ export default function DesignSystemPage() {
                     <span className="absolute left-5 top-5 rounded-pill border border-line-strong bg-ink-950/50 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-cream backdrop-blur">
                       2026 · Residence
                     </span>
-                    <LogoMark className="absolute right-5 top-5 size-6 text-gold/70" />
+                    <LogoMark size={24} className="absolute right-5 top-5" />
                   </div>
                   <div className="flex items-end justify-between gap-4 p-5">
                     <div>
@@ -984,7 +1004,7 @@ export default function DesignSystemPage() {
 
                 <figure className="panel flex flex-col justify-between gap-8 p-6">
                   <div>
-                    <LogoMark className="size-6 text-gold/60" />
+                    <LogoMark size={24} />
                     <blockquote className="mt-6 font-display text-heading text-cream">
                       “They didn’t decorate the room. They composed it.”
                     </blockquote>
@@ -1133,7 +1153,7 @@ export default function DesignSystemPage() {
                   <ul className="mt-7 grid gap-3 text-body-sm text-subtle sm:grid-cols-2">
                     {[
                       "Colour and type tokens",
-                      "Primitives and components",
+                      "Components, icons and buttons",
                       "Layout and motion rules",
                       "Dos, don'ts and a checklist",
                     ].map((item) => (
@@ -1219,10 +1239,7 @@ export default function DesignSystemPage() {
           <div className="mx-auto w-full max-w-page">
             <div className="grid gap-12 md:grid-cols-12 md:items-end">
               <div className="md:col-span-7">
-                <Logo
-                  markClassName="size-12 sm:size-14"
-                  wordmarkClassName="text-3xl sm:text-4xl md:text-5xl"
-                />
+                <Logo size={48} />
                 <p className="mt-7 max-w-md text-body text-mist">
                   Element is an interior design studio working across
                   residential and hospitality spaces. We design slowly, in

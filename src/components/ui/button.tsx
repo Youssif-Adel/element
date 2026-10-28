@@ -1,11 +1,11 @@
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "primary" | "outline" | "ghost";
-export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonVariant = "primary" | "outline" | "ghost" | "glass";
+export type ButtonSize = "sm" | "md" | "lg" | "icon-sm" | "icon";
 
 const base =
-  "group relative inline-flex select-none items-center justify-center gap-2.5 overflow-hidden rounded-pill font-sans leading-none transition-all duration-500 ease-luxe focus-visible:outline-offset-4 disabled:pointer-events-none disabled:opacity-40";
+  "group relative inline-flex cursor-pointer select-none items-center justify-center gap-2.5 overflow-hidden rounded-pill font-sans leading-none transition-all duration-500 ease-luxe focus-visible:outline-offset-4 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40";
 
 const variants: Record<ButtonVariant, string> = {
   primary:
@@ -13,12 +13,16 @@ const variants: Record<ButtonVariant, string> = {
   outline:
     "border border-line-strong bg-white/[0.02] text-cream hover:border-gold/60 hover:bg-gold-soft hover:text-gold-200 active:scale-[0.985]",
   ghost: "text-mist hover:text-gold",
+  glass:
+    "border border-line-strong bg-ink-950/35 text-cream backdrop-blur hover:border-gold/60 hover:bg-ink-950/55 hover:text-gold-200 active:scale-[0.985]",
 };
 
 const sizes: Record<ButtonSize, string> = {
   sm: "h-9 px-5 text-eyebrow font-semibold uppercase",
   md: "h-11 px-6 text-eyebrow font-semibold uppercase",
   lg: "h-13 px-8 text-caption font-semibold uppercase tracking-[0.2em]",
+  "icon-sm": "size-10",
+  icon: "size-11",
 };
 
 export function buttonStyles({
@@ -33,6 +37,11 @@ export function buttonStyles({
   return cn(base, variants[variant], sizes[size], className);
 }
 
+/**
+ * The only button in the system. Pick a variant and a size instead of styling
+ * one by hand; links use `buttonStyles()` with the same options. Icon-only
+ * buttons still need an `aria-label`.
+ */
 export function Button({
   variant = "primary",
   size = "md",
@@ -58,25 +67,5 @@ export function Button({
         {children}
       </span>
     </button>
-  );
-}
-
-/** Small arrow glyph used inside buttons and links. */
-export function ArrowIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden="true"
-      className={cn("size-4", className)}
-    >
-      <path
-        d="M3 8h10M9 4l4 4-4 4"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

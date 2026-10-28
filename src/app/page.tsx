@@ -1,5 +1,13 @@
-import { redirect } from "next/navigation";
+import { Hero } from "@/components/hero";
+import { SiteHeader } from "@/components/site-header";
 
 export default function Home() {
-  redirect("/design-system");
+  return (
+    <div className="relative min-h-screen overflow-x-clip bg-background">
+      <SiteHeader />
+      <main>
+        <Hero />
+      </main>
+    </div>
+  );
 }
